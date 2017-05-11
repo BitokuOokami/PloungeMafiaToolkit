@@ -7,12 +7,7 @@ sys.path.insert(0, '../mafia')
 from game import Game
 from game import Player
 
-class TestMessenger:
-    def message_all_players(self, message: str):
-        print ('public: {message}'.format(message=message))
-
-    def message_player(self, player, message: str):
-        print ('{name}: {message}'.format(name=player.nickname, message=message))
+from testclient.testmessenger import TestMessenger
 
 class SmokeTest(unittest.TestCase):
     def setUp(self):
@@ -35,7 +30,6 @@ class SmokeTest(unittest.TestCase):
         game.target('one', 'two')
         game.target('two', 'one')
         game.target('four', 'one')
-        print(game.actions)
 
 if __name__ == '__main__':
     unittest.main()
