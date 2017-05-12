@@ -2,10 +2,10 @@
 
 import unittest
 import sys
-sys.path.insert(0, '../mafia')
+sys.path.insert(0, '../')
 
-from game import Game
-from game import Player
+from mafia.game import Game
+from mafia.game import Player
 
 from testclient.testmessenger import TestMessenger
 
