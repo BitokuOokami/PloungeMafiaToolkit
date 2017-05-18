@@ -155,8 +155,6 @@ class Game:
         assert len(self.roles) == len(self.players), (
             'Cannot assign roles if unequal to number of players')
         randomized_roles = random.sample(self.roles, len(self.players))
-        print(self.players)
-        print(randomized_roles)
         for player in self.players:
             player.set_role(randomized_roles.pop())
         for player in self.players:
@@ -236,7 +234,6 @@ class Game:
         mafia_target = None
         mafia_count = 0
         for player in self.players:
-            print(player.role)
             if player.nickname in self.actions and player.role == Mafioso:
                 target = self.actions[player.nickname]
                 if target.nickname in mafia_votes:
@@ -247,7 +244,6 @@ class Game:
                     mafia_target = target
                     mafia_count += 1
         if mafia_target:
-            print(mafia_target.nickname)
             mafia_target.kill()
             self.public_message = ('You all awake, but there is someone missing... '
                                    'looks like {name} has been killed during '
