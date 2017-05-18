@@ -1,5 +1,5 @@
 import random
-
+from collections import deque
 from .roles import Townie
 from .roles import Cop
 from .roles import Mafioso
@@ -158,6 +158,20 @@ class Game:
         for player in self.players:
             player.set_role(randomized_roles.pop())
         for player in self.players:
+            self.messenger.message_player(player,
+                                          player.role.get_role_message(self))
+
+    def _assign_players_for_testing(self, *players):
+        '''Add players to the game and assign roles deterministically.'''
+        assert not self.players, 'Use this function instead of "join".'
+        assert len(self.roles) == len(players), (
+            '{role_count} roles, but {player_count} players'
+            .format(role_count=len(self.roles), player_count=len(players)))
+        players = deque(players)
+        for role in self.roles:
+            player = players.popleft()
+            player.set_role(role)
+            self.players.append(player)
             self.messenger.message_player(player,
                                           player.role.get_role_message(self))
 

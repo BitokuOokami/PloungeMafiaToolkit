@@ -13,20 +13,20 @@ class NewGameTest(unittest.TestCase):
         self.messenger = TestMessenger()
 
     def test_role_messages_sent_to_each_player(self):
-        self.game = Game('t,c,m', self.messenger)
+        game = Game('t,c,m', self.messenger)
 
-        self.game.join(Player('one', 'one'))
-        self.game.join(Player('two', 'two'))
-        self.game.join(Player('three', 'three'))
+        game.join(Player('one', 'one'))
+        game.join(Player('two', 'two'))
+        game.join(Player('three', 'three'))
 
         assert 'one' in [name for (name, message) in self.messenger.get_messages()]
         assert 'two' in [name for (name, message) in self.messenger.get_messages()]
         assert 'three' in [name for (name, message) in self.messenger.get_messages()]
 
     def test_message_not_sent_before_full(self):
-        self.game = Game('t,c,m'), self.messenger)
+        game = Game('t,c,m', self.messenger)
 
-        self.game.join(Player('one', 'one'))
+        game.join(Player('one', 'one'))
         assert 'one' not in [name for (name, message) in self.messenger.get_messages()]
 
     def test_roles_match_setup(self):
@@ -34,36 +34,50 @@ class NewGameTest(unittest.TestCase):
         pass
 
     def test_target_fails_during_signup(self):
-        self.game = Game('t,c,m', self.messenger)
-        assert not self.target('one', 'two')
+        game = Game('t,c,m', self.messenger)
+        assert not game.target('one', 'two')
 
     def test_voting_fails_during_signup(self):
-        self.game = Game('t,c,m', self.messenger)
-        assert not self.vote('one', 'two')
+        game = Game('t,c,m', self.messenger)
+        assert not game.vote('one', 'two')
 
     def test_join_fails_if_player_is_already_in_game(self):
-        self.game = Game('t,c,m', self.messenger)
-        assert self.join('one')
-        assert self.join('one')
+        game = Game('t,c,m', self.messenger)
+        assert game.join(Player('one', 'one'))
+        assert game.join(Player('one', 'one'))
 
 class VotingTest(unittest.TestCase):
-    '''Currently unused.'''
     def setUp(self):
         self.messenger = TestMessenger()
         self.game = Game('t,t,m', self.messenger)
-        self.join(Player('one', 'one'))
-        self.join(Player('two', 'two'))
-        self.join(Player('three', 'three'))
+        self.game.join(Player('one', 'one'))
+        self.game.join(Player('two', 'two'))
+        self.game.join(Player('three', 'three'))
 
     def test_vote_target_dies(self):
         assert self.game.get_player('three').is_alive()
-        self.vote('one', 'three')
-        self.vote('two', 'three')
+        self.game.vote('one', 'three')
+        self.game.vote('two', 'three')
         assert self.game.get_player('three').is_dead()
     
 class NightActionTest(unittest.TestCase):
     def setUp(self):
-        pass
-        
+        self.messenger = TestMessenger()
+        self.game = Game('t,t,m', self.messenger)
+        self.game._assign_players_for_testing(
+            Player('one', 'one'),
+            Player('two', 'two'),
+            Player('three', 'three'))
+        # Advance the phases twice to start tests in the night phase.
+        self.game.advance_phase()
+        self.game.advance_phase()
+
+    def test_night_messages_sent_to_each_player(self):
+        self.messenger.clear_messages()
+        self.game.target('three', 'one')
+        assert 'one' in [name for (name, message) in self.messenger.get_messages()]
+        assert 'two' in [name for (name, message) in self.messenger.get_messages()]
+        assert 'three' in [name for (name, message) in self.messenger.get_messages()]
+
 if __name__ == '__main__':
     unittest.main()
