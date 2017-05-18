@@ -55,8 +55,11 @@ class VotingTest(unittest.TestCase):
         self.join(Player('two', 'two'))
         self.join(Player('three', 'three'))
 
-    def test_pass(self):
-        pass
+    def test_vote_target_dies(self):
+        assert self.game.get_player('three').is_alive()
+        self.vote('one', 'three')
+        self.vote('two', 'three')
+        assert self.game.get_player('three').is_dead()
     
 class NightActionTest(unittest.TestCase):
     def setUp(self):
