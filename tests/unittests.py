@@ -63,7 +63,7 @@ class VotingTest(unittest.TestCase):
 class NightActionTest(unittest.TestCase):
     def setUp(self):
         self.messenger = TestMessenger()
-        self.game = Game('t,t,m', self.messenger)
+        self.game = Game('t,c,m', self.messenger)
         self.game._assign_players_for_testing(
             Player('one', 'one'),
             Player('two', 'two'),
@@ -75,9 +75,17 @@ class NightActionTest(unittest.TestCase):
     def test_night_messages_sent_to_each_player(self):
         self.messenger.clear_messages()
         self.game.target('three', 'one')
+        self.game.target('two', 'one')
         assert 'one' in [name for (name, message) in self.messenger.get_messages()]
         assert 'two' in [name for (name, message) in self.messenger.get_messages()]
         assert 'three' in [name for (name, message) in self.messenger.get_messages()]
+
+    def test_mafia_mafia_kill_happens_before_cop(self):
+        self.messenger.clear_messages()
+        self.game.target('three', 'two')
+        self.game.target('two', 'one')
+        assert ('two', 'You have been killed! =(') in self.messenger.get_messages()
+        
 
 if __name__ == '__main__':
     unittest.main()
