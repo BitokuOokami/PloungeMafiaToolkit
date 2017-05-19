@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import random
 from collections import deque
 from .roles import Townie
