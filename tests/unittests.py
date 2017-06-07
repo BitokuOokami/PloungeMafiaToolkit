@@ -12,6 +12,25 @@ class NewGameTest(unittest.TestCase):
     def setUp(self):
         self.messenger = TestMessenger()
 
+    def test_no_players_in_new_game(self):
+        game = Game('t,c,m', self.messenger)
+        assert game.player_count() == 0
+
+    def test_player_count_increases_after_each_join(self):
+        game = Game('t,c,m', self.messenger)
+        game.join(Player('one', 'one'))
+        assert game.player_count() == 1
+        game.join(Player('two', 'two'))
+        assert game.player_count() == 2
+        game.join(Player('three', 'three'))
+        assert game.player_count() == 3
+
+    def test_player_only_joins_once(self):
+        game = Game('t,c,m', self.messenger)
+        game.join(Player('one', 'one'))
+        game.join(Player('one', 'one'))
+        assert game.player_count() == 1
+
     def test_role_messages_sent_to_each_player(self):
         game = Game('t,c,m', self.messenger)
 
@@ -40,11 +59,6 @@ class NewGameTest(unittest.TestCase):
     def test_voting_fails_during_signup(self):
         game = Game('t,c,m', self.messenger)
         assert not game.vote('one', 'two')
-
-    def test_join_fails_if_player_is_already_in_game(self):
-        game = Game('t,c,m', self.messenger)
-        assert game.join(Player('one', 'one'))
-        assert game.join(Player('one', 'one'))
 
 class VotingTest(unittest.TestCase):
     def setUp(self):

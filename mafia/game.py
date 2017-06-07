@@ -2,6 +2,8 @@
 
 import random
 from collections import deque
+from .actions import JoinAction
+from .phases import Signup
 from .roles import Townie
 from .roles import Cop
 from .roles import Mafioso
@@ -40,6 +42,9 @@ class Player(object):
     def set_role(self, role):
         self._role = role
 
+    def get_role(self):
+        return self._role
+
     def __eq__(self, other):
         return isinstance(other, Player) and other.contact == self.contact
 
@@ -63,10 +68,12 @@ class Player(object):
 
 class Game:
     messenger = None
-    phase = None
+    phase = 'signup'
+    phases = []
     day_number = 0
     players = []
     roles = []
+    randomized_roles = []
     votes = {}
     actions = {}
     public_message = None
@@ -75,7 +82,8 @@ class Game:
         assert Game.is_valid_setup(game_setup), (
             'Please validate the setup before creating a game.')
         self.roles = Game.parse_roles(game_setup)
-        self.phase = 'signup'
+        self.randomized_roles = random.sample(self.roles, len(self.roles))
+        self.phases.append(Signup())
         self.day_number = 0
         self.players = []
         self.messenger = messenger
@@ -83,7 +91,11 @@ class Game:
             'A new game has started, join with "!join"')
 
     def join(self, player) -> bool:
-        '''Returns True if the player was able to join the game. '''
+        """Returns True if the player was able to join the game."""
+        self.add_action(JoinAction(self, player))
+
+    def old_join(self, player):
+        #TODO delete me
         if self.phase != "signup":
             return False
         if player not in self.players:
@@ -96,7 +108,7 @@ class Game:
         return True
 
     def vote(self, player_name: str, target_name: str) -> bool:
-        '''Returns True if the vote was cast.'''
+        """Returns True if the vote was cast."""
         player = self.get_player(player_name)
         target = self.get_player(target_name)
         if self.phase != 'day':
@@ -140,6 +152,10 @@ class Game:
             return True
         return False
 
+    def check_phase_end():
+        if self.get_current_phase().is_over():
+            self.phase.append(self.get_current_phase().advance_phase())
+
     def is_valid_setup(game_setup: str) -> bool:
         roles =  game_setup.split(',')
         for role in roles:
@@ -152,6 +168,9 @@ class Game:
         for role in game_setup.split(','):
             roles.append(legal_roles[role])
         return roles
+
+    def get_next_role(self):
+        return self.randomized_roles.pop()
 
     def assign_roles(self):
         assert len(self.roles) == len(self.players), (
@@ -209,7 +228,27 @@ class Game:
                 return True
         return False
 
+    def get_current_phase(self):
+        return self.phases[-1]
+
+    def player_count(self):
+        return len(self.players)
+
+    def add_player(self, player):
+        self.players.append(player)
+
+    def role_count(self):
+        return len(self.roles)
+
+    def add_action(self, action):
+        phase = self.get_current_phase()
+        phase.add_action(action)
+        if not phase.is_ended() and phase.is_phase_end(self):
+            next_phase = phase.advance_phase()
+            self.phases.append(next_phase)
+
     def get_player(self, name: str):
+        print(self.players)
         for player in self.players:
             if player.nickname.lower() == name.lower():
                 return player
@@ -286,3 +325,6 @@ class Game:
             elif player.is_alive():
                 self.messenger.message_player(player,
                                               'You have an uneventful night.')
+
+    def message_player(self, player, message):
+        self.messenger.message_player(player, message)
