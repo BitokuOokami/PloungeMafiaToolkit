@@ -60,6 +60,14 @@ class NewGameTest(unittest.TestCase):
         game = Game('t,c,m', self.messenger)
         assert not game.vote('one', 'two')
 
+    def test_all_actions_resolve_before_phase_advances(self):
+        game = Game('t,t,m', self.messenger)
+        game.join(Player('one', 'one'))
+        game.join(Player('two', 'two'))
+        game.join(Player('three', 'three'))
+
+        assert len(game.get_current_phase()._log) == 0
+
 class VotingTest(unittest.TestCase):
     def setUp(self):
         self.messenger = TestMessenger()

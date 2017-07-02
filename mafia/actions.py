@@ -107,6 +107,9 @@ class VoteAction(DayAction):
             self._game.add_action(Lynch(self._game, self._target))
         self._resolved = True
 
+    def get_player(self):
+        return self._player
+
     def get_target(self):
         return self._target
 

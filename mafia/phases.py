@@ -17,8 +17,8 @@ class Phase(object):
     def check_queue(self):
         if not self._checking:
             self._checking = True
-            if (not self._actions.empty()
-                   and self._actions.queue[0].get_priority() <= self._priority):
+            while(not self._actions.empty()
+                  and self._actions.queue[0].get_priority() <= self._priority):
                 action = self._actions.get()
                 action.resolve()
                 self._log.append(action)
