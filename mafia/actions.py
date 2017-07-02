@@ -2,11 +2,6 @@
 
 class Action(object):
     _resolved = False
-    
-    def __init__(self, game, player, target=None):
-        self._game = game
-        self._player = player
-        self._target = target
 
     def get_priority(self):
         return self._priority
@@ -39,7 +34,6 @@ class JoinAction(Action):
         self._priority = 0
 
     def resolve(self):
-        print("Resolving Join action for {name}.".format(name=self._player.nickname))
         # TODO: make this less of a hack (probably use a decorator)
         if self._player not in self._game.players:
             self._game.add_player(self._player)
@@ -57,7 +51,6 @@ class AssignRoleAction(Action):
         self._priority = 90
 
     def resolve(self):
-        print("Resolving Assign action for {name}.".format(name=self._player.nickname))
         assert not self._resolved
         self._player.set_role(self._game.get_next_role())
         self._game.add_action(RoleMessageAction(
@@ -66,13 +59,12 @@ class AssignRoleAction(Action):
         self._resolved = True
 
 class RoleMessageAction(Action):
-    def __init__(self, game, player, priority=99):
+    def __init__(self, game, player):
         self._game = game
         self._player = player
-        self._priority = priority
+        self._priority = 99
 
     def resolve(self):
-        print("Resolving Message action for {name}.".format(name=self._player.nickname))
         self._game.message_player(
             self._player,
             self._player.get_role().get_role_message(self._game))
@@ -89,11 +81,44 @@ class MessageAction(Action):
         self._game.message_player(self._player, self._message)
         self._resolved = True
 
+class PublicPost(Action):
+    def __init__(self, game, message, priority=99):
+        self._game = game
+        self._message = message
+        self._priority = priority
+
+    def resolve(self):
+        self._game.message_all_players(self._message)
+        self._resolved = True
+        
 class DayAction(Action):
     pass
 
-class VotingAction(DayAction):
-    pass
+class VoteAction(DayAction):
+    def __init__(self, game, player, target):
+        self._game = game
+        self._player = player
+        self._target = target
+        self._priority = 0
+
+    def resolve(self):
+        vote_count = self._game.vote_count(self._target)
+        if vote_count > self._game.count_living()/2:
+            self._game.add_action(Lynch(self._game, self._target))
+        self._resolved = True
+
+    def get_target(self):
+        return self._target
+
+class Lynch(DayAction):
+    def __init__(self, game, target):
+        self._game = game
+        self._target = target
+        self._priority = 90
+
+    def resolve(self):
+        self._target.lynch()
+        self._resolved = True
 
 class NightAction(Action):
     pass
