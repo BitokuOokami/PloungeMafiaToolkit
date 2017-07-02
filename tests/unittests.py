@@ -32,16 +32,15 @@ class NewGameTest(unittest.TestCase):
         assert game.player_count() == 1
 
     def test_role_messages_sent_to_each_player(self):
-        test_messenger = TestMessenger()
-        game = Game('t,c,m', test_messenger)
+        game = Game('t,c,m', self.messenger)
 
         game.join(Player('one', 'one'))
         game.join(Player('two', 'two'))
         game.join(Player('three', 'three'))
 
-        assert 'onex' in [name for (name, message) in self.messenger.get_messages()]
-        assert 'twox' in [name for (name, message) in self.messenger.get_messages()]
-        assert 'threex' in [name for (name, message) in self.messenger.get_messages()]
+        assert 'one' in [name for (name, message) in self.messenger.get_messages()]
+        assert 'two' in [name for (name, message) in self.messenger.get_messages()]
+        assert 'three' in [name for (name, message) in self.messenger.get_messages()]
 
     def test_message_not_sent_before_full(self):
         game = Game('t,c,m', self.messenger)
