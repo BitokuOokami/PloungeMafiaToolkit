@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 class TestMessenger:
-    messages = []
+    def __init__(self):
+        self.messages = []
 
     def message_all_players(self, message: str):
         self.messages.append(('public', message))

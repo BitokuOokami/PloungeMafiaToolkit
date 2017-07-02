@@ -3,6 +3,7 @@
 import random
 from collections import deque
 from .actions import JoinAction
+from .actions import VoteAction
 from .phases import Signup
 from .roles import Townie
 from .roles import Cop
@@ -35,6 +36,9 @@ class Player(object):
 
     def is_alive(self):
         return self._status == 'alive'
+
+    def lynch(self):
+        self._status = 'dead'
 
     def kill(self):
         self._status = 'dead'
@@ -108,6 +112,13 @@ class Game:
         return True
 
     def vote(self, player_name: str, target_name: str) -> bool:
+        player = self.get_player(player_name)
+        target = self.get_player(target_name)
+        assert player, "Player {name} isn't playing.".format(name=player_name)
+        assert target, "Target {name} isn't playing.".format(name=player_name)
+        self.add_action(VoteAction(self, player, target))
+
+    def old_vote(self, player_name: str, target_name: str) -> bool:
         """Returns True if the vote was cast."""
         player = self.get_player(player_name)
         target = self.get_player(target_name)
@@ -240,15 +251,17 @@ class Game:
     def role_count(self):
         return len(self.roles)
 
+    def vote_count(self, player):
+        return self.get_current_phase().compile_votes()[player]
+
     def add_action(self, action):
         phase = self.get_current_phase()
         phase.add_action(action)
-        if not phase.is_ended() and phase.is_phase_end(self):
+        if not phase.is_checking() and not phase.is_ended() and phase.is_phase_end(self):
             next_phase = phase.advance_phase()
             self.phases.append(next_phase)
 
     def get_player(self, name: str):
-        print(self.players)
         for player in self.players:
             if player.nickname.lower() == name.lower():
                 return player
@@ -328,3 +341,6 @@ class Game:
 
     def message_player(self, player, message):
         self.messenger.message_player(player, message)
+
+    def message_all_players(self, message):
+        self.messenger.message_all_players(message)
