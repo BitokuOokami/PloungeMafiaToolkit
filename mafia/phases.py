@@ -51,13 +51,13 @@ class Signup(Phase):
 
 class Day(Phase):
     def __init__(self, day_count):
-       self._day_count = day_count
-       super(Day, self).__init__()
+        
+        self._day_count = day_count
+        super(Day, self).__init__()
 
     def advance_phase(self):
         next_phase = Night(self._day_count)
         self._ended = True
-        (vote_count, target) = self.compile_votes()
         self.increase_priority()
         while not self._actions.empty():
             action = self.actions.get()
@@ -66,15 +66,18 @@ class Day(Phase):
         return next_phase
 
     def is_phase_end(self, game):
-        (vote_count, target) = self.compile_votes()
-        return vote_count > game.player_count()/2
+        votes_for_player = self.compile_votes()
+        for vote_count in votes_for_player.values():
+            if vote_count > game.count_living()/2:
+                return True
+        return False
 
     def compile_votes(self):
         votes_by_player = {}
         for action in self._log:
             player = action.get_player()
             target = action.get_target()
-            votes[player] = target
+            votes_by_player[player.nickname] = target.nickname
         votes_for_player = {}
         for vote_target in votes_by_player.values():
             if vote_target in votes_for_player:

@@ -71,9 +71,7 @@ class Player(object):
         self.night_message = None
 
 class Game:
-    messenger = None
     phase = 'signup'
-    phases = []
     day_number = 0
     players = []
     roles = []
@@ -87,7 +85,7 @@ class Game:
             'Please validate the setup before creating a game.')
         self.roles = Game.parse_roles(game_setup)
         self.randomized_roles = random.sample(self.roles, len(self.roles))
-        self.phases.append(Signup())
+        self.phases = [Signup()]
         self.day_number = 0
         self.players = []
         self.messenger = messenger
@@ -252,12 +250,17 @@ class Game:
         return len(self.roles)
 
     def vote_count(self, player):
-        return self.get_current_phase().compile_votes()[player]
+        votes = self.get_current_phase().compile_votes()
+        if player.nickname not in votes:
+            return 0
+        return votes[player.nickname]
 
     def add_action(self, action):
         phase = self.get_current_phase()
         phase.add_action(action)
-        if not phase.is_checking() and not phase.is_ended() and phase.is_phase_end(self):
+        if (not phase.is_checking()
+            and not phase.is_ended()
+            and phase.is_phase_end(self)):
             next_phase = phase.advance_phase()
             self.phases.append(next_phase)
 

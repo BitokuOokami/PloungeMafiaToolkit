@@ -103,7 +103,7 @@ class VoteAction(DayAction):
 
     def resolve(self):
         vote_count = self._game.vote_count(self._target)
-        if vote_count > self._game.count_living()/2:
+        if vote_count + 1 >= self._game.count_living()/2:
             self._game.add_action(Lynch(self._game, self._target))
         self._resolved = True
 
