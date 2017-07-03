@@ -92,7 +92,7 @@ class Game:
         self.messenger.message_all_players(
             'A new game has started, join with "!join"')
 
-    def join(self, player) -> bool:
+    def join(self, player):
         """Returns True if the player was able to join the game."""
         self.add_action(JoinAction(self, player))
 
@@ -109,7 +109,7 @@ class Game:
             self.advance_phase()
         return True
 
-    def vote(self, player_name: str, target_name: str) -> bool:
+    def vote(self, player_name: str, target_name: str):
         player = self.get_player(player_name)
         target = self.get_player(target_name)
         assert player, "Player {name} isn't playing.".format(name=player_name)
@@ -143,6 +143,11 @@ class Game:
                 self.advance_phase()
             return True
         return False
+
+    def action(self, player_name: str, *args):
+        player = self.get_player(player_name)
+        action = player.get_role().get_action()
+        self.add_action(action(self, player, *args))
 
     def target(self, player_name: str, target_name: str) -> bool:
         '''Returns True if the action was accepted.'''

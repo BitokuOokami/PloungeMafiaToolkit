@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from .actions import InvestigationAction
+
 class Role:
     pass
     
@@ -77,3 +79,5 @@ class Cop(Town):
                 'and conclude that they are definitely {faction}!'
                 .format(name=target.nickname, faction=target.role.get_faction()))
                 
+    def get_action():
+        return InvestigationAction

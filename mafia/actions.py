@@ -125,3 +125,19 @@ class Lynch(DayAction):
 
 class NightAction(Action):
     pass
+
+class InvestigationAction(NightAction):
+    def __init__(self, game, player, target_name):
+        self._game = game
+        self._player = player
+        self._target = game.get_player(target_name)
+        self._priority = 90
+
+    def resolve(self):
+        self._game.add_action(MessageAction(
+            self._game,
+            self._player,
+            "{name} is {faction}.".format(
+                name=self._target.nickname,
+                faction=self._target.get_role().get_faction())))
+        self._resolved = True
